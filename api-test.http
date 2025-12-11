@@ -1,0 +1,33 @@
+### Elenco creature
+GET http://localhost:8000/api/creatures
+Accept: application/json
+
+###
+
+### Dettaglio di una creatura (sostituisci 1 con un ID esistente)
+GET http://localhost:8000/api/creatures/1
+Accept: application/json
+
+###
+
+### Elenco divinità
+GET http://localhost:8000/api/deities
+Accept: application/json
+
+###
+
+### Dettaglio di una divinità (sostituisci 1 con un ID esistente)
+GET http://localhost:8000/api/deities/1
+Accept: application/json
+
+###
+
+### Elenco leggende
+GET http://localhost:8000/api/legends
+Accept: application/json
+
+###
+
+### Dettaglio leggenda
+GET http://localhost:8000/api/legends/1
+Accept: application/json
