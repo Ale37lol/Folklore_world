@@ -23,24 +23,24 @@
         <div class="flex flex-col lg:flex-row gap-6">
             <!-- Sidebar index -->
             <div class="lg:w-1/4 bg-white rounded-lg shadow-md overflow-hidden h-full">
-    <div class="p-4 border-b border-gray-200">
-        <h3 class="font-semibold text-lg text-gray-800">Index Cultures</h3>
-    </div>
-    <div id="culture-index" class="overflow-y-auto" style="max-height: 600px;">
-        <ul class="divide-y divide-gray-200">
-            @php
-                // Sort the collection alphabetically by name (case-insensitive)
-                $sortedCultures = $cultures->sortBy(function($culture) {
-                    return strtolower($culture->name);
-                });
-            @endphp
-            
-            @foreach ($sortedCultures as $culture)
-                <li class="p-3 hover:bg-gray-50 cursor-pointer transition-colors"
-                    data-culture-id="{{ $culture->id }}" onclick="focusCulture({{ $culture->id }})">
-                    <div class="flex items-center">
-                        <div
-                            class="w-3 h-3 rounded-full mr-2 
+                <div class="p-4 border-b border-gray-200">
+                    <h3 class="font-semibold text-lg text-gray-800">Index Cultures</h3>
+                </div>
+                <div id="culture-index" class="overflow-y-auto" style="max-height: 600px;">
+                    <ul class="divide-y divide-gray-200">
+                        @php
+                            // Sort the collection alphabetically by name (case-insensitive)
+                            $sortedCultures = $cultures->sortBy(function ($culture) {
+                                return strtolower($culture->name);
+                            });
+                        @endphp
+
+                        @foreach ($sortedCultures as $culture)
+                            <li class="p-3 hover:bg-gray-50 cursor-pointer transition-colors"
+                                data-culture-id="{{ $culture->id }}" onclick="focusCulture({{ $culture->id }})">
+                                <div class="flex items-center">
+                                    <div
+                                        class="w-3 h-3 rounded-full mr-2 
                             {{ in_array($culture->name, [
                                 'Ancient Egypt',
                                 'Greece',
@@ -50,24 +50,25 @@
                             ])
                                 ? 'bg-red-500'
                                 : 'bg-blue-500' }}">
-                        </div>
-                        <div>
-                            <h4 class="font-medium">{{ $culture->name }}</h4>
-                            <p class="text-sm text-gray-600">{{ $culture->region }}</p>
-                        </div>
-                    </div>
-                </li>
-            @endforeach
-        </ul>
-    </div>
-</div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium">{{ $culture->name }}</h4>
+                                        <p class="text-sm text-gray-600">{{ $culture->region }}</p>
+                                    </div>
+                                </div>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
 
             <!-- Map container -->
             <div class="lg:w-3/4 bg-white rounded-lg shadow-md overflow-hidden relative">
-                <div id="map-container" class="relative">
-                    <!-- Legend overlay -->
-                    <div id="map-overlay" style="position: absolute; top: 1; left: 10; z-index: 1000;"
-                        class="absolute top-4 right-4 bg-white bg-opacity-90 p-3 rounded-lg shadow-md z-10 border border-gray-200">
+                <div id="map-container">
+                    <div id="map" class="z-10" style="height: 600px; width: 100%;"></div>
+
+                    <div id="map-overlay"
+                        class="absolute top-4 right-4 bg-white bg-opacity-90 p-3 rounded-lg shadow-md border border-gray-200 z-20">
                         <h3 class="font-semibold text-lg mb-2 text-gray-800">Map legend</h3>
                         <div class="flex items-center mb-1">
                             <div class="w-4 h-4 rounded-full bg-red-500 mr-2"></div>
@@ -78,8 +79,6 @@
                             <span class="text-sm">Other Culture</span>
                         </div>
                     </div>
-
-                    <div id="map" style="height: 600px; width: 100%;"></div>
                 </div>
             </div>
         </div>
@@ -98,27 +97,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
 
     <script>
-        fetch('/api/cultures')
-            .then(response => response.json())
-            .then(data => {
-                console.log(data);
-            });
-        document.addEventListener('DOMContentLoaded', function() {
-            fetch('/api/cultures')
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Dati dalle API:', data);
-                    data.forEach(culture => {
-                        if (culture.latitude && culture.longitude) {
-                            L.marker([culture.latitude, culture.longitude])
-                                .addTo(folkloreMap)
-                                .bindPopup(`<b>${culture.name}</b><br>${culture.region}`);
-                        }
-                    });
-                })
-                .catch(error => console.error('Errore API:', error));
-        });
-
         // Mappa globale
         let folkloreMap = null;
         let markerCluster = null;
@@ -139,7 +117,7 @@
                 ];
             })->toJson() !!};
 
-        // mappa con controllo
+        // Initialize map with control
         function initializeMap() {
             if (isMapInitialized) return folkloreMap;
 
@@ -150,8 +128,8 @@
                 maxBounds: [
                     [-90, -180],
                     [90, 180]
-                ], // Limiti del mondo
-                maxBoundsViscosity: 1.0 // Forza i limiti
+                ],
+                maxBoundsViscosity: 1.0
             });
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -160,13 +138,13 @@
             }).addTo(folkloreMap);
 
             markerCluster = L.markerClusterGroup({
-                maxClusterRadius: 60, // Riduci il raggio del cluster
+                maxClusterRadius: 60,
                 spiderfyOnMaxZoom: false,
                 showCoverageOnHover: false
             });
             folkloreMap.addLayer(markerCluster);
 
-            // Adatta la mappa ai marker con padding ottimale
+            // Adjust map size and fit markers
             setTimeout(() => {
                 folkloreMap.invalidateSize();
                 fitMapToMarkers();
@@ -185,7 +163,7 @@
                 const bounds = L.latLngBounds(validCoords);
                 folkloreMap.fitBounds(bounds, {
                     padding: [20, 20],
-                    maxZoom: 8 // Zoom massimo
+                    maxZoom: 8
                 });
             }
         }
@@ -200,16 +178,24 @@
 
                 focusCulture(cultureId);
             });
+
+            // Load initial API data if needed
+            fetch('/api/cultures')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('API data:', data);
+                })
+                .catch(error => console.error('API Error:', error));
         });
 
-        // Focus su una cultura specifica
+        // Focus on a specific culture
         function focusCulture(cultureId) {
             const culture = culturesData.find(c => c.id == cultureId);
             if (!culture) return;
 
             document.getElementById('culture-selector').value = cultureId;
 
-            // Centra la mappa
+            // Center the map
             if (culture.coords && culture.coords[0] !== 0) {
                 folkloreMap.setView(culture.coords, 6, {
                     animate: true,
@@ -217,7 +203,7 @@
                 });
             }
 
-            // Evidenzia nell'indice
+            // Highlight in the index
             document.querySelectorAll('#culture-index li').forEach(li => {
                 li.classList.remove('bg-blue-100');
                 if (li.dataset.cultureId == cultureId) {
@@ -232,7 +218,7 @@
             loadCultureDetails(cultureId);
         }
 
-        // Aggiungi marker alla mappa
+        // Add markers to the map
         function addCultureMarkers(culturesData) {
             if (markerCluster) {
                 markerCluster.clearLayers();
@@ -255,7 +241,7 @@
                         <p class="text-sm text-gray-600">${culture.region}</p>
                         <button onclick="focusCulture(${culture.id})" 
                             class="mt-2 w-full bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded text-sm transition-colors">
-                            Vedi Dettagli
+                            View Details
                         </button>
                     </div>
                 `, {
@@ -270,7 +256,7 @@
             });
         }
 
-        // Carica i dettagli della cultura
+        // Load culture details
         function loadCultureDetails(cultureId) {
             const detailsContainer = document.getElementById('culture-details');
             detailsContainer.innerHTML = `
@@ -282,7 +268,7 @@
 
             fetch(`/cultures/${cultureId}/details`)
                 .then(response => {
-                    if (!response.ok) throw new Error('Errore nel caricamento');
+                    if (!response.ok) throw new Error('Loading error');
                     return response.text();
                 })
                 .then(html => {
@@ -295,9 +281,9 @@
                     console.error('Error:', error);
                     detailsContainer.innerHTML = `
                         <div class="text-center py-8 text-red-500">
-                            <p>Errore nel caricamento dei dettagli.</p>
+                            <p>Error loading details.</p>
                             <button onclick="window.location.reload()" class="mt-2 text-blue-500 hover:underline">
-                                Ricarica la pagina
+                                Reload page
                             </button>
                         </div>
                     `;
@@ -308,18 +294,15 @@
 @section('styles')
     @parent
     <style>
-        #map-overlay {
-            position: fixed;
-            display: none;
-            z-index: 2;
+        #map {
+            height: 100vh;
+            width: 100%;
+            top: 0;
+            left: 0;
+            position: absolute;
+  z-index: 10;
         }
 
-        #map {
-            min-height: 600px;
-            height: 600px;
-            width: 100%;
-            z-index: 1;
-        }
 
         .leaflet-container {
             background: #fff;
@@ -360,7 +343,7 @@
             animation: fadeIn 0.3s ease-out;
         }
 
-        /* Stile per i cluster più compatti */
+        /* Style for more compact clusters */
         .marker-cluster-small,
         .marker-cluster-medium,
         .marker-cluster-large {
@@ -372,5 +355,6 @@
         .marker-cluster-large div {
             background-color: rgba(59, 130, 246, 0.8) !important;
         }
+
     </style>
 @endsection

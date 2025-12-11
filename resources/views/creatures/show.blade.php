@@ -43,7 +43,6 @@
                     <h3 class="font-semibold mb-2">Details</h3>
                     <p><span class="font-medium">Culture:</span> {{ $creature->culture->name ?? 'Unknown' }}</p>
                     <p><span class="font-medium">Type:</span> {{ $creature->type ?? 'Unknown' }}</p>
-                    <p><span class="font-medium">Classification:</span> {{ $creature->class->name ?? 'Unknown' }}</p>
                 </div>
             </div>
         </div>

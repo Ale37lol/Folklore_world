@@ -8,7 +8,8 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 </head>
 <body class="bg-gray-100">
-    <nav class="bg-blue-900 text-white p-4">
+    <!-- Fixed Navbar - stays at top when scrolling -->
+    <nav class="bg-blue-900 text-white p-4 fixed top-0 left-0 w-full z-50">
         <div class="container mx-auto flex justify-between items-center">
             <a href="/" class="text-2xl font-bold">Folklore World</a>
             <div class="flex space-x-4">
@@ -21,7 +22,8 @@
         </div>
     </nav>
 
-    <main class="container mx-auto py-8">
+    <!-- Add padding-top to main to prevent content from hiding behind fixed navbar -->
+    <main class="container mx-auto py-8 pt-20"> <!-- Added pt-20 (5rem = 80px) -->
         @yield('content')
     </main>
 
